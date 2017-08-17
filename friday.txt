@@ -1,0 +1,93 @@
+Try
+            MysqlConn = New MySqlConnection()
+            MysqlConn.ConnectionString = mvarCon
+            MysqlConn.Open()
+
+            Dim ds As New DataSet
+            Dim dt As New DataTable
+            Dim dsBatch As New DataSet
+            Dim dtBatch As New DataTable
+            Dim dsSum As New DataSet
+            Dim dtSum As New DataTable
+            Dim Command1 = New MySqlCommand
+            Dim firstString As String = ""
+            Dim secondString As String = ""
+            Dim sw1 As StreamWriter
+            Dim sw2 As StreamWriter
+
+            MysqlConn = New MySqlConnection
+            MysqlConn.ConnectionString = mvarCon
+            Dim SDA As New MySqlDataAdapter
+            Dim SDA1 As New MySqlDataAdapter
+            Try
+                MysqlConn.Open()
+
+                Dim querryBatch As String = "SELECT IFNULL(MAX(batchid),0) + 1 FROM batchmaster;"
+                Dim Command = New MySqlCommand(querryBatch, MysqlConn)
+                SDA.SelectCommand = Command
+                SDA.Fill(dsBatch)
+                Dim BatchFileName As String = ""
+                Dim BatchID As String = ""
+                BatchID = dsBatch.Tables(0).Rows(0)(0).ToString()
+                BatchFileName = "Batch" & BatchID & ".txt"
+
+                Dim querry As String
+                querry = "SELECT `iPaymentNo`, `iRecieptNo`, `dDateEntered`, `iCustomerNo`, `iPoints`, `iTotalAmount`, `iDiscount`, "
+                querry = querry & " `iTotalAmountPaid`, `cStatus`, `iTaxAmount`, `iChange`, `iEmpno`, `iShopNo`, `iTime`, `dDateVoid`, `iTimeVoid`, "
+                querry = querry & " `syncStatus`, `transactiontype`, `ordernumber` FROM `tsretail_mannequeen`.`tpospayment` LIMIT 5;"
+
+                Command1 = Nothing
+                Command1 = New MySqlCommand(querry, MysqlConn)
+                SDA.SelectCommand = Command1
+                SDA.Fill(ds, "tpospayment")
+
+                If (Not File.Exists(Application.StartupPath & "/Individual/" & BatchFileName)) Then
+                    sw1 = File.CreateText(Application.StartupPath & "/Individual/" & BatchFileName)
+                Else
+                    sw1 = File.AppendText(Application.StartupPath & "/Individual/" & BatchFileName)
+                End If
+                For i As Integer = 0 To ds.Tables(0).Rows.Count - 1
+                    firstString = ds.Tables(0).Rows(i)(0).ToString & "|" & ds.Tables(0).Rows(i)(1).ToString & "|" & ds.Tables(0).Rows(i)(2).ToString & "|" & ds.Tables(0).Rows(i)(3).ToString & "|" & ds.Tables(0).Rows(i)(4).ToString & "|" & ds.Tables(0).Rows(i)(5).ToString() & "|"
+                    firstString = firstString & ds.Tables(0).Rows(i)(6).ToString & "|" & ds.Tables(0).Rows(i)(7).ToString & "|" & ds.Tables(0).Rows(i)(8).ToString & "|" & ds.Tables(0).Rows(i)(9).ToString & "|" & ds.Tables(0).Rows(i)(10).ToString & "|" & ds.Tables(0).Rows(i)(11).ToString() & "|"
+                    firstString = firstString & ds.Tables(0).Rows(i)(12).ToString & "|" & ds.Tables(0).Rows(i)(13).ToString & "|" & ds.Tables(0).Rows(i)(14).ToString & "|" & ds.Tables(0).Rows(i)(15).ToString & "|" & ds.Tables(0).Rows(i)(16).ToString & "|" & ds.Tables(0).Rows(i)(17).ToString() & "|" & ds.Tables(0).Rows(i)(18).ToString()
+                    
+                    sw1.WriteLine(firstString)
+
+                    querry = "SELECT `iPaySeq`, `iPaymentNo`, `dDateEntered`, `iCustomerno`, `iProductNo`, `iPrice`, `cCommisionType`, `iCommision`, `iEmpNo`, `iQty`, `iShopNo`, "
+                    querry = querry & " `cType`, `iBookingNo`, `iPoints`, `cProdName`, `cStatus`, `cRemarks`, `dDateRefund`, `iQtyRefund`, `iTotalAmt`, `iCombinationNo`, "
+                    querry = querry & " `cFruitType`, `cDiscountDesc`, `iDiscountAmt`, `dDateExchange`, `cExchangeComment`, `cExchangeOR`, `cComments`, `cSellType`, "
+                    querry = querry & " `iAddpoint`, `festiveno`, `bLineVoid`, `syncStatus` FROM `tsretail_mannequeen`.`dpaymentdetails`  WHERE `ipaymentno`=" & ds.Tables(0).Rows(i)(0).ToString() & ""
+                    Command1 = Nothing
+                    Command1 = New MySqlCommand(querry, MysqlConn)
+                    SDA1.SelectCommand = Command1
+                    dsSum = Nothing
+                    dsSum = New DataSet
+                    SDA1.Fill(dsSum, "tpospayment")
+
+                    If (Not File.Exists(Application.StartupPath & "/Summary/" & BatchFileName)) Then
+                        sw2 = File.CreateText(Application.StartupPath & "/Summary/" & BatchFileName)
+                    Else
+                        sw2 = File.AppendText(Application.StartupPath & "/Summary/" & BatchFileName)
+                    End If
+                    For j As Integer = 0 To dsSum.Tables(0).Rows.Count - 1
+                        secondString = dsSum.Tables(0).Rows(j)(0).ToString & "|" & dsSum.Tables(0).Rows(j)(1).ToString & "|" & dsSum.Tables(0).Rows(j)(2).ToString & "|" & dsSum.Tables(0).Rows(j)(3).ToString & "|" & dsSum.Tables(0).Rows(j)(4).ToString & "|" & dsSum.Tables(0).Rows(j)(5).ToString() & "|"
+                        secondString = secondString & dsSum.Tables(0).Rows(j)(6).ToString & "|" & dsSum.Tables(0).Rows(j)(7).ToString & "|" & dsSum.Tables(0).Rows(j)(8).ToString & "|" & dsSum.Tables(0).Rows(j)(9).ToString & "|" & dsSum.Tables(0).Rows(j)(10).ToString & "|" & dsSum.Tables(0).Rows(j)(11).ToString() & "|"
+                        secondString = secondString & dsSum.Tables(0).Rows(j)(12).ToString & "|" & dsSum.Tables(0).Rows(j)(13).ToString & "|" & dsSum.Tables(0).Rows(j)(14).ToString & "|" & dsSum.Tables(0).Rows(j)(15).ToString & "|" & dsSum.Tables(0).Rows(j)(16).ToString & "|" & dsSum.Tables(0).Rows(j)(17).ToString() & "|" & dsSum.Tables(0).Rows(j)(17).ToString() & "|"
+                        secondString = secondString & dsSum.Tables(0).Rows(j)(18).ToString & "|" & dsSum.Tables(0).Rows(j)(19).ToString & "|" & dsSum.Tables(0).Rows(j)(20).ToString & "|" & dsSum.Tables(0).Rows(j)(21).ToString & "|" & dsSum.Tables(0).Rows(j)(22).ToString & "|" & dsSum.Tables(0).Rows(j)(23).ToString() & "|" & dsSum.Tables(0).Rows(j)(24).ToString() & "|"
+                        secondString = secondString & dsSum.Tables(0).Rows(j)(25).ToString & "|" & dsSum.Tables(0).Rows(j)(26).ToString & "|" & dsSum.Tables(0).Rows(j)(27).ToString & "|" & dsSum.Tables(0).Rows(j)(28).ToString & "|" & dsSum.Tables(0).Rows(j)(29).ToString & "|" & dsSum.Tables(0).Rows(j)(30).ToString() & "|" & dsSum.Tables(0).Rows(j)(31).ToString() & "|"
+                        secondString = secondString & dsSum.Tables(0).Rows(j)(32).ToString
+                        sw2.WriteLine(secondString)
+                    Next
+                    sw2.Close()
+                Next
+                sw1.Close()
+
+                MysqlConn.Close()
+            Catch ex1 As Exception
+                MessageBox.Show(ex1.Message.ToString())
+            End Try
+            MysqlConn.Close()
+            MysqlConn.Dispose()
+        Catch ex As MySqlException
+            MessageBox.Show("Cannot connect to database: " & ex.Message)
+        End Try
